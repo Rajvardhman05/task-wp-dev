@@ -128,7 +128,7 @@
                     <div class="form-group">
                         <textarea></textarea>
                     </div>
-                    <button type="button" class="btn btn-primary">Publish</button>
+                    <button type="button" class="btn btn-primary js-add-post">Publish</button>
                 </form>
 
             </div>
@@ -137,8 +137,58 @@
     </div>
 
 </body>
+
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="js/bootstrap.min.js"></script>
+
+<script>
+    fetch('url_wordpress/v2/posts').then(function(response) {
+        return response.json()
+    }).then(function(posts) {
+        console.log(posts)
+    });
+
+    fetch('url_wordpress/v1/token', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'accept': 'application/json',
+        },
+
+        body: JSON.stringify({
+            username: 'admin',
+            password: 'admin@123'
+        })
+    }).then(function(response) {
+        return response.json()
+    }).then(function(user) {
+        console.log(user.token)
+        localStorage.setItem('jwt', user.token) //token has saved to local storage
+    });
+
+    function addPost() {
+        fetch('url_wordpress/v2/product', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // jwt from local storage
+            },
+            body: JSON.stringify({
+                title: 'Add posts from the frontend',
+                content: 'This is the way to add posts from your frontend.',
+                status: 'publish'
+            })
+        }).then(function(response) {
+            return response.json()
+        }).then(function(post) {
+            console.log(post)
+        });
+    }
+
+    const addPostButton = document.querySelector('.js-add-post')
+    addPostButton.addEventListener('click', () => addPost())
+</script>
 
 </html>
